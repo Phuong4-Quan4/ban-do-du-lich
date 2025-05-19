@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bản đồ du lịch Phường 4, Quận 4</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Thư viện Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    #map { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    var map = L.map('map').setView([10.7585, 106.7070], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Tải GeoJSON và hiển thị với hiệu ứng
+    fetch('ranh-gioi.geojson')
+      .then(res => res.json())
+      .then(data => {
+        // Viền trắng nền
+        L.geoJSON(data, {
+          style: {
+            color: 'white',
+            weight: 8,
+            fillOpacity: 0
+          }
+        }).addTo(map);
+
+        // Lớp chính màu đỏ + hiệu ứng hover
+        var geojson = L.geoJSON(data, {
+          style: {
+            color: 'red',
+            weight: 3,
+            fillColor: '#ffcccc',
+            fillOpacity: 0.4
+          },
+          onEachFeature: function (feature, layer) {
+            layer.on({
+              mouseover: function (e) {
+                e.target.setStyle({
+                  weight: 5,
+                  color: 'orange',
+                  fillOpacity: 0.6
+                });
+              },
+              mouseout: function (e) {
+                geojson.resetStyle(e.target);
+              }
+            });
+            if (feature.properties && feature.properties.name) {
+              layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
+            }
+          }
+        }).addTo(map);
+      });
+
+    // Điểm đánh dấu
+    var diaDiem = [
+      {
+        ten: "Quán Linh",
+        mota: "Quán ăn nổi tiếng với món hủ tiếu",
+        vitri: [10.756285971286067, 106.70541861686188]
+      },
+      {
+        ten: "Barber Vũ Hoàng Phi",
+        mota: "Tiệm cắt tóc phong cách hiện đại",
+        vitri: [10.75627943544502, 106.70310360804633]
+      },
+      {
+        ten: "Gờ Café",
+        mota: "Quán cà phê yên tĩnh với không gian xanh",
+        vitri: [10.756006289944036, 106.70378600748917]
+      },
+      {
+        ten: "Ủy ban nhân dân Phường 4 Quận 4",
+        mota: "Cơ quan Nhà nước",
+        vitri: [10.753303, 106.704611]
+      },
+      {
+        ten: "Tổ đình Giác Nguyên",
+        mota: "Ngôi chùa cổ kính với kiến trúc độc đáo",
+        vitri: [10.759452194980001, 106.70166660995187]
+      },
+      {
+        ten: "Quán ăn 2 cây bàng",
+        mota: "Quán ăn gia đình nổi tiếng với món lẩu",
+        vitri: [10.75645599696925, 106.70212124064618]
+      }
+    ];
+
+    diaDiem.forEach(function(d) {
+      L.marker(d.vitri).addTo(map)
+        .bindPopup(`<b>${d.ten}</b><br>${d.mota}`);
+    });
+  </script>
+</body>
+</html>
