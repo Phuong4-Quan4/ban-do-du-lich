@@ -28,7 +28,7 @@
     fetch('ranh-gioi.geojson')
       .then(res => res.json())
       .then(data => {
-        // Viền trắng nền
+        // Viền đỏ nền
         L.geoJSON(data, {
           style: {
             color: 'white',
