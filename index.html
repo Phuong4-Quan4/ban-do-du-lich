@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,76 +17,38 @@
   <div id="map"></div>
 
   <script>
+    // Khởi tạo bản đồ
     var map = L.map('map').setView([10.7585, 106.7070], 15);
 
+    // Thêm lớp bản đồ nền
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Tải GeoJSON và hiển thị với hiệu ứng
-    <script>
-fetch('./ranh-gioi.geojson')
-  .then(res => res.json())
-  .then(data => {
-    // Lớp nền trắng tạo viền dày
-    L.geoJSON(data, {
-      style: {
-        color: 'white',
-        weight: 8,
-        fillOpacity: 0
-      }
-    }).addTo(map);
-
-    // Lớp chính với hiệu ứng
-    var geojson = L.geoJSON(data, {
-      style: {
-        color: 'red',
-        weight: 3,
-        fillColor: '#ffcccc',
-        fillOpacity: 0.4
-      },
-      onEachFeature: function (feature, layer) {
-        layer.on({
-          mouseover: function (e) {
-            e.target.setStyle({
-              weight: 5,
-              color: 'orange',
-              fillOpacity: 0.6
-            });
+    // Vẽ ranh giới địa bàn từ GeoJSON
+    fetch('9fc18095-84aa-4879-a35c-3cfe2462c6d0.geojson')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: {
+            color: 'blue',
+            weight: 3,
+            fillOpacity: 0.2
           },
-          mouseout: function (e) {
-            geojson.resetStyle(e.target);
+          onEachFeature: function (feature, layer) {
+            if (feature.properties && feature.properties.name) {
+              layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
+            }
           }
-        });
+        }).addTo(map);
+      });
 
-        // Thêm hoa vào dọc theo ranh giới
-        const coords = feature.geometry.coordinates[0]; // dạng Polygon
-        for (let i = 0; i < coords.length; i += 10) { // chèn hoa mỗi 10 điểm
-          const latlng = [coords[i][1], coords[i][0]];
-
-          const flowerIcon = L.icon({
-            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Emoji_u1f33c.svg/32px-Emoji_u1f33c.svg.png',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
-          });
-
-          L.marker(latlng, { icon: flowerIcon }).addTo(map);
-        }
-
-        if (feature.properties && feature.properties.name) {
-          layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
-        }
-      }
-    }).addTo(map);
-  });
-</script>
-
-    // Điểm đánh dấu
+    // Các điểm đánh dấu du lịch
     var diaDiem = [
       {
         ten: "Quán Linh",
         mota: "Quán ăn nổi tiếng với món hủ tiếu",
-        vitri: [10.756285971286067, 106.70541861686188]
+        vitri: [10.756285971286067, 106.70541861686188] 
       },
       {
         ten: "Barber Vũ Hoàng Phi",
