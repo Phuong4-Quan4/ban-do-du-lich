@@ -27,13 +27,13 @@
     }).addTo(map);
 
     // Tải GeoJSON và hiển thị với hiệu ứng
-    fetch('./ranh-gioi.geojson')
+    fetch('ranh-gioi.geojson')
       .then(res => res.json())
       .then(data => {
-        // Viền đỏ nền
+        // Viền trắng nền
         L.geoJSON(data, {
           style: {
-            color: 'red',
+            color: 'white',
             weight: 8,
             fillOpacity: 0
           }
@@ -47,39 +47,23 @@
             fillColor: '#ffcccc',
             fillOpacity: 0.4
           },
-onEachFeature: function (feature, layer) {
-  layer.on({
-    mouseover: function (e) {
-      e.target.setStyle({
-        weight: 5,
-        color: 'orange',
-        fillOpacity: 0.6
-      });
-    },
-    mouseout: function (e) {
-      geojson.resetStyle(e.target);
-    }
-  });
-
-  // 🌸 Gắn hoa dọc ranh giới
-  const coords = feature.geometry.coordinates[0];
-  const flowerIcon = L.icon({
-    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Emoji_u1f33c.svg/32px-Emoji_u1f33c.svg.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
-  });
-
-  for (let i = 0; i < coords.length; i += 10) {
-    if (coords[i]) {
-      const latlng = [coords[i][1], coords[i][0]];
-      L.marker(latlng, { icon: flowerIcon }).addTo(map);
-    }
-  }
-
-  if (feature.properties && feature.properties.name) {
-    layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
-  }
-}
+          onEachFeature: function (feature, layer) {
+            layer.on({
+              mouseover: function (e) {
+                e.target.setStyle({
+                  weight: 5,
+                  color: 'orange',
+                  fillOpacity: 0.6
+                });
+              },
+              mouseout: function (e) {
+                geojson.resetStyle(e.target);
+              }
+            });
+            if (feature.properties && feature.properties.name) {
+              layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
+            }
+          }
         }).addTo(map);
       });
 
