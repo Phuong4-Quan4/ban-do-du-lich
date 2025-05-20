@@ -101,10 +101,27 @@
       }
     ];
 
-    diaDiem.forEach(function(d) {
-      L.marker(d.vitri).addTo(map)
-        .bindPopup(`<b>${d.ten}</b><br>${d.mota}`);
-    });
+diaDiem.forEach(function(d) {
+  L.marker(d.vitri).addTo(map)
+    .bindPopup(`
+      <div style="width: 250px; font-family: Arial, sans-serif;">
+        <h3 style="margin: 0; font-size: 18px;">Bản đồ du lịch Phường 4</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/vi/8/8a/Mì_gia_Hồng_Ký.jpg" alt="${d.ten}" style="width: 100%; border-radius: 8px; margin: 8px 0;">
+        <h4 style="margin: 4px 0;">${d.ten}</h4>
+        <p style="margin: 0;">
+          <span style="color: red;">📍</span> Địa điểm du lịch nổi bật<br>
+          <span style="color: brown;">⏰</span> Giờ mở cửa: 7h00 - 21h00
+        </p>
+        <ul style="padding-left: 20px; margin: 8px 0;">
+          <li>Dịch vụ hấp dẫn</li>
+          <li>Không gian xanh</li>
+          <li>Thân thiện, giá tốt</li>
+        </ul>
+        <img src="https://cdn.tgdd.vn/Files/2021/05/28/1354973/huong-dan-nau-mi-vit-tiem-ngon-don-gian-tai-nha-202105281631108298.jpg" style="width: 100%; border-radius: 8px;">
+      </div>
+    `);
+});
+
   </script>
 
 </body>
