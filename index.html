@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,25 +18,46 @@
   <div id="map"></div>
 
   <script>
-    // Khởi tạo bản đồ
     var map = L.map('map').setView([10.7585, 106.7070], 15);
 
-    // Thêm lớp bản đồ nền
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Vẽ ranh giới địa bàn từ GeoJSON
-    fetch('9fc18095-84aa-4879-a35c-3cfe2462c6d0.geojson')
+    // Tải GeoJSON và hiển thị với hiệu ứng
+    fetch('ranh-gioi.geojson')
       .then(res => res.json())
       .then(data => {
+        // Viền trắng nền
         L.geoJSON(data, {
           style: {
-            color: 'blue',
+            color: 'white',
+            weight: 8,
+            fillOpacity: 0
+          }
+        }).addTo(map);
+
+        // Lớp chính màu đỏ + hiệu ứng hover
+        var geojson = L.geoJSON(data, {
+          style: {
+            color: 'red',
             weight: 3,
-            fillOpacity: 0.2
+            fillColor: '#ffcccc',
+            fillOpacity: 0.4
           },
           onEachFeature: function (feature, layer) {
+            layer.on({
+              mouseover: function (e) {
+                e.target.setStyle({
+                  weight: 5,
+                  color: 'orange',
+                  fillOpacity: 0.6
+                });
+              },
+              mouseout: function (e) {
+                geojson.resetStyle(e.target);
+              }
+            });
             if (feature.properties && feature.properties.name) {
               layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
             }
@@ -43,12 +65,12 @@
         }).addTo(map);
       });
 
-    // Các điểm đánh dấu du lịch
+    // Điểm đánh dấu
     var diaDiem = [
       {
         ten: "Quán Linh",
         mota: "Quán ăn nổi tiếng với món hủ tiếu",
-        vitri: [10.756285971286067, 106.70541861686188] 
+        vitri: [10.756285971286067, 106.70541861686188]
       },
       {
         ten: "Barber Vũ Hoàng Phi",
