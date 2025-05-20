@@ -46,22 +46,37 @@
             fillOpacity: 0.4
           },
           onEachFeature: function (feature, layer) {
-            layer.on({
-              mouseover: function (e) {
-                e.target.setStyle({
-                  weight: 5,
-                  color: 'orange',
-                  fillOpacity: 0.6
-                });
-              },
-              mouseout: function (e) {
-                geojson.resetStyle(e.target);
-              }
-            });
-            if (feature.properties && feature.properties.name) {
-              layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
-            }
-          }
+  layer.on({
+    mouseover: function (e) {
+      e.target.setStyle({
+        weight: 5,
+        color: 'orange',
+        fillOpacity: 0.6
+      });
+    },
+    mouseout: function (e) {
+      geojson.resetStyle(e.target);
+    }
+  });
+
+  // 🌸 GẮN HOA TRÊN RANH GIỚI
+  const coords = feature.geometry.coordinates[0]; // polygon
+  for (let i = 0; i < coords.length; i += 1) {
+    if (i % 2 === 0) { // cách ra mỗi 2 điểm
+      const latlng = [coords[i][1], coords[i][0]];
+      const flowerIcon = L.icon({
+        iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Emoji_u1f33c.svg/32px-Emoji_u1f33c.svg.png',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+      L.marker(latlng, { icon: flowerIcon }).addTo(map);
+    }
+  }
+
+  if (feature.properties && feature.properties.name) {
+    layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
+  }
+}
         }).addTo(map);
       });
 
