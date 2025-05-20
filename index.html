@@ -27,13 +27,13 @@
     }).addTo(map);
 
     // Tải GeoJSON và hiển thị với hiệu ứng
-    fetch('ranh-gioi.geojson')
+    fetch('./ranh-gioi.geojson')
       .then(res => res.json())
       .then(data => {
-        // Viền trắng nền
+        // Viền đỏ nền
         L.geoJSON(data, {
           style: {
-            color: 'white',
+            color: 'red',
             weight: 8,
             fillOpacity: 0
           }
