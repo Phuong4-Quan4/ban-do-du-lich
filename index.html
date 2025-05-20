@@ -5,18 +5,14 @@
   <title>Bản đồ du lịch Phường 4, Quận 4</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Thư viện Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
   <style>
     #map { height: 100vh; }
   </style>
 </head>
 <body>
   <div id="map"></div>
-
   <script>
     var map = L.map('map').setView([10.7585, 106.7070], 15);
 
@@ -24,20 +20,17 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Tải GeoJSON và hiển thị với hiệu ứng
-    fetch('ranh-gioi.geojson')
+    fetch('./ranh-gioi.geojson')
       .then(res => res.json())
       .then(data => {
-        // Viền đỏ nền
         L.geoJSON(data, {
           style: {
-            color: 'red',
+            color: 'white',
             weight: 8,
             fillOpacity: 0
           }
         }).addTo(map);
 
-        // Lớp chính màu đỏ + hiệu ứng hover
         var geojson = L.geoJSON(data, {
           style: {
             color: 'red',
@@ -46,38 +39,40 @@
             fillOpacity: 0.4
           },
           onEachFeature: function (feature, layer) {
-  layer.on({
-    mouseover: function (e) {
-      e.target.setStyle({
-        weight: 5,
-        color: 'orange',
-        fillOpacity: 0.6
-      });
-    },
-    mouseout: function (e) {
-      geojson.resetStyle(e.target);
-    }
-  });
+            layer.on({
+              mouseover: function (e) {
+                e.target.setStyle({
+                  weight: 5,
+                  color: 'orange',
+                  fillOpacity: 0.6
+                });
+              },
+              mouseout: function (e) {
+                geojson.resetStyle(e.target);
+              }
+            });
 
-  // 🌸 GẮN HOA TRÊN RANH GIỚI
-const coords = feature.geometry.coordinates[0]; // polygon
-const flowerIcon = L.icon({
-  iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Emoji_u1f33c.svg/32px-Emoji_u1f33c.svg.png',
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
-});
+            const coords = feature.geometry.coordinates[0];
+            const flowerIcon = L.icon({
+              iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Emoji_u1f33c.svg/32px-Emoji_u1f33c.svg.png',
+              iconSize: [24, 24],
+              iconAnchor: [12, 12]
+            });
 
-// Duyệt từng 15 điểm, và kiểm tra an toàn trước khi tạo marker
-for (let i = 0; i < coords.length; i += 15) {
-  if (coords[i]) {
-    const latlng = [coords[i][1], coords[i][0]];
-    L.marker(latlng, { icon: flowerIcon }).addTo(map);
-  }
-}
+            for (let i = 0; i < coords.length; i += 15) {
+              if (coords[i]) {
+                const latlng = [coords[i][1], coords[i][0]];
+                L.marker(latlng, { icon: flowerIcon }).addTo(map);
+              }
+            }
+
+            if (feature.properties && feature.properties.name) {
+              layer.bindPopup("<b>Ranh giới:</b> " + feature.properties.name);
+            }
+          }
         }).addTo(map);
       });
 
-    // Điểm đánh dấu
     var diaDiem = [
       {
         ten: "Quán Linh",
