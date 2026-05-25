@@ -2,6 +2,7 @@ video-builder/uploads/
 video-builder/output/
 video-builder/__pycache__/
 video-builder/.env
+video-builder/*.log
 *.pyc
 *.pyo
 __pycache__/
