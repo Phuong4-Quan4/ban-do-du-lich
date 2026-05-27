@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Xây Dựng - Tạo Video Tiến Độ Thi Công</title>
+<style>
+:root {
+  --orange: #ff8c00;
+  --orange-light: #ffa733;
+  --dark: #1a1a2e;
+  --card: #16213e;
+  --card2: #0f3460;
+  --text: #e0e0e0;
+  --text-dim: #8888aa;
+  --success: #2ecc71;
+  --danger: #e74c3c;
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, var(--card2) 0%, var(--dark) 100%);
+  border-bottom: 2px solid var(--orange);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+header .logo { font-size: 32px; }
+header h1 { font-size: 22px; font-weight: 700; color: var(--orange); }
+header p { font-size: 13px; color: var(--text-dim); }
+
+/* Layout */
+.container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+.grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+@media(max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+/* Panel */
+.panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid #2a2a4a;
+  overflow: hidden;
+}
+.panel-head {
+  background: var(--card2);
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #2a2a4a;
+}
+.panel-body { padding: 18px; }
+
+/* Drop zone */
+#drop-zone {
+  border: 2px dashed #3a3a6a;
+  border-radius: var(--radius);
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #0d0d20;
+}
+#drop-zone.dragover {
+  border-color: var(--orange);
+  background: #1a0f00;
+}
+#drop-zone .icon { font-size: 48px; margin-bottom: 12px; }
+#drop-zone p { color: var(--text-dim); font-size: 14px; }
+#drop-zone b { color: var(--orange); }
+#file-input { display: none; }
+
+/* Image grid */
+#image-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+  min-height: 20px;
+}
+.img-card {
+  background: #0d0d20;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #2a2a4a;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.img-card:hover { border-color: var(--orange); }
+.img-card img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+}
+.img-card .img-info {
+  padding: 6px 8px;
+  font-size: 11px;
+}
+.img-card .img-stage {
+  display: inline-block;
+  background: var(--orange);
+  color: #000;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-weight: 700;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+.img-card .img-name {
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.img-card .btn-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(231,76,60,0.85);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.img-card:hover .btn-remove { opacity: 1; }
+
+/* Stage selector modal */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--orange);
+  padding: 24px;
+  width: 90%;
+  max-width: 480px;
+}
+.modal h3 { margin-bottom: 16px; font-size: 16px; }
+.stage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.stage-btn {
+  background: #0d0d20;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  color: var(--text);
+}
+.stage-btn:hover {
+  border-color: var(--orange);
+  background: #1a0f00;
+}
+.stage-btn .num {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--orange);
+  display: block;
+  margin-bottom: 2px;
+}
+.stage-btn .name { font-size: 12px; font-weight: 600; }
+.stage-btn .desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+/* Sidebar */
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #2a2a4a;
+  font-size: 13px;
+}
+.summary-item:last-child { border: none; }
+.summary-item .val { font-weight: 600; color: var(--orange); }
+
+/* Stages list */
+.stage-list-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #2a2a4a;
+  font-size: 13px;
+}
+.stage-list-item .s-num {
+  display: inline-block;
+  background: var(--orange);
+  color: #000;
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-weight: 700;
+  margin-right: 6px;
+  font-size: 11px;
+}
+.stage-count { color: var(--text-dim); font-size: 11px; float: right; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background: var(--orange);
+  color: #000;
+  width: 100%;
+  justify-content: center;
+  font-size: 15px;
+  padding: 13px;
+}
+.btn-primary:hover { background: var(--orange-light); }
+.btn-primary:disabled { background: #555; color: #888; cursor: not-allowed; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #c0392b; }
+.btn-success { background: var(--success); color: #000; width: 100%; justify-content: center; }
+
+/* Progress */
+#progress-section { display: none; }
+#progress-section.visible { display: block; }
+.progress-bar-wrap {
+  background: #0d0d20;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 20px;
+  margin: 12px 0;
+  border: 1px solid #2a2a4a;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--orange-light));
+  transition: width 0.5s ease;
+  border-radius: 8px;
+  min-width: 2px;
+}
+.progress-msg { font-size: 13px; color: var(--text-dim); text-align: center; }
+
+/* Result */
+#result-section { display: none; }
+#result-section.visible { display: block; }
+.result-box {
+  background: #0a1f0a;
+  border: 1px solid var(--success);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.result-box .big-icon { font-size: 48px; display: block; margin-bottom: 8px; }
+.result-box p { font-size: 14px; margin-bottom: 4px; }
+.result-box .stats { color: var(--text-dim); font-size: 13px; }
+
+/* Alert */
+.alert {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.alert-danger { background: #2a0f0f; border: 1px solid var(--danger); color: #ff8888; }
+.alert-info { background: #0f1a2a; border: 1px solid #3a6ab0; color: #88bbff; }
+
+/* Telegram info */
+.tg-box {
+  background: #0d1b2a;
+  border: 1px solid #1e90ff;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 16px;
+}
+.tg-box h3 { color: #1e90ff; margin-bottom: 10px; font-size: 14px; }
+.tg-box code {
+  background: #0a1520;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #88ccff;
+  font-size: 13px;
+}
+.tg-box ul { padding-left: 16px; font-size: 13px; line-height: 2; color: var(--text-dim); }
+.tg-box ul li { margin: 2px 0; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">🏗</span>
+  <div>
+    <h1>Video Xây Dựng</h1>
+    <p>Tạo video tiến độ thi công từ ảnh thực tế — Mỗi ảnh 8 giây, ghép liền mạch</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid">
+
+    <!-- LEFT: Upload & Image List -->
+    <div>
+      <div class="panel">
+        <div class="panel-head">
+          <span>📸</span> Thêm Ảnh Công Trình
+        </div>
+        <div class="panel-body">
+          <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <div class="icon">🖼</div>
+            <p>Kéo thả ảnh vào đây hoặc <b>nhấn để chọn file</b></p>
+            <p style="margin-top:6px;font-size:12px;">Hỗ trợ: JPG, PNG, WEBP • Tối đa {{ (15)|int }}MB mỗi ảnh</p>
+          </div>
+          <input type="file" id="file-input" accept="image/*" multiple>
+
+          <div id="upload-error" class="alert alert-danger" style="display:none;margin-top:12px;"></div>
+
+          <div id="image-list"></div>
+
+          <div id="image-empty" class="empty-state" style="margin-top:12px;">
+            Chưa có ảnh nào. Hãy tải lên ít nhất 1 ảnh.
+          </div>
+        </div>
+      </div>
+
+      <!-- Telegram info -->
+      <div class="tg-box">
+        <h3>📱 Dùng qua Telegram Bot</h3>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">
+          Thay vì dùng web, bạn có thể tạo video trực tiếp trên Telegram:
+        </p>
+        <ul>
+          <li><code>/start</code> — Bắt đầu phiên mới</li>
+          <li>Gửi ảnh → chọn giai đoạn → gửi tiếp</li>
+          <li><code>/generate</code> — Tạo video & nhận về</li>
+          <li><code>/stages</code> — Xem danh sách giai đoạn</li>
+          <li><code>/list</code> — Kiểm tra ảnh đã thêm</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div>
+      <!-- Summary -->
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-head"><span>📊</span> Thống Kê</div>
+        <div class="panel-body">
+          <div class="summary-item">
+            <span>Tổng ảnh</span>
+            <span class="val" id="stat-images">0</span>
+          </div>
+          <div class="summary-item">
+            <span>Thời lượng video</span>
+            <span class="val" id="stat-duration">0 giây</span>
+          </div>
+          <div class="summary-item">
+            <span>Phân đoạn (8s/ảnh)</span>
+            <span class="val" id="stat-segments">0</span>
+          </div>
+          <div class="summary-item">
+            <span>Dung lượng ước tính</span>
+            <span class="val" id="stat-size">0 MB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stages summary -->
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-head"><span>🏗</span> Giai Đoạn Thi Công</div>
+        <div class="panel-body" id="stage-summary">
+          {% for s in stages %}
+          <div class="stage-list-item" id="stage-row-{{ s.num }}">
+            <span class="s-num">{{ s.num }}</span>
+            {{ s.name }}
+            <span class="stage-count" id="stage-count-{{ s.num }}">0 ảnh</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Progress & Generate -->
+      <div class="panel">
+        <div class="panel-head"><span>🎬</span> Tạo Video</div>
+        <div class="panel-body">
+          <!-- Progress -->
+          <div id="progress-section">
+            <div class="alert alert-info" id="progress-msg-text">Đang chuẩn bị...</div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+            </div>
+            <p class="progress-msg" id="progress-detail"></p>
+          </div>
+
+          <!-- Result -->
+          <div id="result-section">
+            <div class="result-box">
+              <span class="big-icon">🎉</span>
+              <p><strong>Video đã tạo xong!</strong></p>
+              <p class="stats" id="result-stats"></p>
+            </div>
+            <a id="download-btn" class="btn btn-success" href="#">
+              ⬇ Tải Video MP4
+            </a>
+            <button class="btn btn-danger" style="width:100%;margin-top:8px;" onclick="resetAll()">
+              🔄 Tạo Video Mới
+            </button>
+          </div>
+
+          <!-- Error -->
+          <div id="error-section" style="display:none;">
+            <div class="alert alert-danger" id="error-msg"></div>
+            <button class="btn btn-danger" style="width:100%;" onclick="resetProgress()">
+              Thử lại
+            </button>
+          </div>
+
+          <!-- Generate button -->
+          <div id="generate-section">
+            <button class="btn btn-primary" id="btn-generate" onclick="startGenerate()" disabled>
+              🎬 Tạo Video Ngay
+            </button>
+            <p style="font-size:12px;color:var(--text-dim);text-align:center;margin-top:8px;">
+              Mỗi ảnh sẽ tạo 1 clip 8 giây với hiệu ứng Ken Burns.<br>
+              Các clip được ghép liền mạch bằng crossfade.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stage Modal -->
+<div class="modal-overlay" id="stage-modal">
+  <div class="modal">
+    <h3>🏗 Ảnh này thuộc giai đoạn nào?</h3>
+    <div class="stage-grid" id="stage-modal-grid">
+      {% for s in stages %}
+      <button class="stage-btn" onclick="selectStage({{ s.num }})">
+        <span class="num">{{ s.num }}</span>
+        <span class="name">{{ s.name }}</span>
+        <span class="desc">{{ s.desc }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+const SEGMENT_DURATION = {{ segment_duration }};
+const MB_PER_SECOND = 0.3; // ước tính ~2Mbps → 0.3 MB/s (H.264 CRF23 720p)
+
+let imageItems = [];  // [{path, filename, stage_num, previewUrl, name}]
+let pendingItem = null;
+let currentJobId = null;
+let pollInterval = null;
+
+// ---------------------------------------------------------------------------
+// Upload
+// ---------------------------------------------------------------------------
+
+document.getElementById('file-input').addEventListener('change', e => {
+  [...e.target.files].forEach(uploadFile);
+  e.target.value = '';
+});
+
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  [...e.dataTransfer.files].forEach(uploadFile);
+});
+
+async function uploadFile(file) {
+  if (!file.type.startsWith('image/')) {
+    showError(`${file.name} không phải ảnh`);
+    return;
+  }
+  if (file.size > 15 * 1024 * 1024) {
+    showError(`${file.name} quá lớn (tối đa 15MB)`);
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('file', file);
+  const previewUrl = URL.createObjectURL(file);
+
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok || data.error) { showError(data.error || 'Lỗi tải lên'); return; }
+
+    // Store item, show stage picker
+    pendingItem = {
+      path: data.path,
+      filename: data.filename,
+      previewUrl,
+      name: file.name,
+    };
+    showStageModal();
+  } catch(e) {
+    showError('Lỗi kết nối: ' + e.message);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Stage modal
+// ---------------------------------------------------------------------------
+
+function showStageModal() {
+  document.getElementById('stage-modal').classList.add('open');
+}
+function hideStageModal() {
+  document.getElementById('stage-modal').classList.remove('open');
+}
+document.getElementById('stage-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) { pendingItem = null; hideStageModal(); }
+});
+
+function selectStage(stageNum) {
+  if (!pendingItem) { hideStageModal(); return; }
+  const item = { ...pendingItem, stage_num: stageNum, order: imageItems.length };
+  imageItems.push(item);
+  hideStageModal();
+  pendingItem = null;
+  renderImages();
+  updateStats();
+}
+
+// ---------------------------------------------------------------------------
+// Render images
+// ---------------------------------------------------------------------------
+
+const STAGE_NAMES = {
+  {% for s in stages %}{{ s.num }}: "{{ s.name }}",{% endfor %}
+};
+
+function renderImages() {
+  const list = document.getElementById('image-list');
+  const empty = document.getElementById('image-empty');
+  list.innerHTML = '';
+
+  if (imageItems.length === 0) {
+    empty.style.display = '';
+    document.getElementById('btn-generate').disabled = true;
+    return;
+  }
+  empty.style.display = 'none';
+  document.getElementById('btn-generate').disabled = false;
+
+  imageItems.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = 'img-card';
+    card.innerHTML = `
+      <img src="${item.previewUrl}" alt="${item.name}">
+      <div class="img-info">
+        <span class="img-stage">G${item.stage_num}</span>
+        <div class="img-name">${item.name}</div>
+      </div>
+      <button class="btn-remove" title="Xóa" onclick="removeImage(${idx})">✕</button>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function removeImage(idx) {
+  URL.revokeObjectURL(imageItems[idx].previewUrl);
+  imageItems.splice(idx, 1);
+  imageItems.forEach((item, i) => item.order = i);
+  renderImages();
+  updateStats();
+}
+
+function updateStats() {
+  const n = imageItems.length;
+  const dur = n * SEGMENT_DURATION;
+  const sizeMB = (dur * MB_PER_SECOND).toFixed(1);
+
+  document.getElementById('stat-images').textContent = n;
+  document.getElementById('stat-duration').textContent = `${dur} giây`;
+  document.getElementById('stat-segments').textContent = n;
+  document.getElementById('stat-size').textContent = `~${sizeMB} MB`;
+
+  // Update stage counts
+  const counts = {};
+  imageItems.forEach(item => {
+    counts[item.stage_num] = (counts[item.stage_num] || 0) + 1;
+  });
+  {% for s in stages %}
+  document.getElementById('stage-count-{{ s.num }}').textContent =
+    (counts[{{ s.num }}] || 0) + ' ảnh';
+  {% endfor %}
+}
+
+// ---------------------------------------------------------------------------
+// Generate
+// ---------------------------------------------------------------------------
+
+async function startGenerate() {
+  if (imageItems.length < 1) return;
+
+  document.getElementById('generate-section').style.display = 'none';
+  document.getElementById('progress-section').classList.add('visible');
+  document.getElementById('result-section').classList.remove('visible');
+  document.getElementById('error-section').style.display = 'none';
+
+  const payload = {
+    images: imageItems.map(item => ({
+      path: item.path,
+      stage_num: item.stage_num,
+      order: item.order,
+    }))
+  };
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Lỗi server');
+    currentJobId = data.job_id;
+    pollInterval = setInterval(pollStatus, 1200);
+  } catch(e) {
+    showGenerateError(e.message);
+  }
+}
+
+async function pollStatus() {
+  if (!currentJobId) return;
+  try {
+    const res = await fetch(`/api/status/${currentJobId}`);
+    const data = await res.json();
+
+    document.getElementById('progress-bar').style.width = data.progress + '%';
+    document.getElementById('progress-msg-text').textContent = data.message || '';
+    document.getElementById('progress-detail').textContent =
+      data.progress < 100 ? `${data.progress}% hoàn thành` : '';
+
+    if (data.status === 'done') {
+      clearInterval(pollInterval);
+      showResult();
+    } else if (data.status === 'error') {
+      clearInterval(pollInterval);
+      showGenerateError(data.error || 'Lỗi không xác định');
+    }
+  } catch(e) {
+    // Network hiccup, keep polling
+  }
+}
+
+function showResult() {
+  document.getElementById('progress-section').classList.remove('visible');
+  document.getElementById('result-section').classList.add('visible');
+
+  const n = imageItems.length;
+  const dur = n * SEGMENT_DURATION;
+  document.getElementById('result-stats').textContent =
+    `${n} ảnh • ${dur} giây • 720p HD`;
+
+  document.getElementById('download-btn').href = `/api/download/${currentJobId}`;
+}
+
+function showGenerateError(msg) {
+  document.getElementById('progress-section').classList.remove('visible');
+  document.getElementById('error-section').style.display = 'block';
+  document.getElementById('error-msg').textContent = '❌ ' + msg;
+}
+
+function resetProgress() {
+  document.getElementById('progress-section').classList.remove('visible');
+  document.getElementById('result-section').classList.remove('visible');
+  document.getElementById('error-section').style.display = 'none';
+  document.getElementById('generate-section').style.display = 'block';
+  currentJobId = null;
+  if (pollInterval) clearInterval(pollInterval);
+}
+
+function resetAll() {
+  imageItems.forEach(i => URL.revokeObjectURL(i.previewUrl));
+  imageItems = [];
+  renderImages();
+  updateStats();
+  resetProgress();
+}
+
+function showError(msg) {
+  const el = document.getElementById('upload-error');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+// Init
+updateStats();
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./output:/app/output
+      - ./.env:/app/.env:ro
+    environment:
+      - WEB_PORT=5000
+    restart: unless-stopped
+
+  bot:
+    build: .
+    command: python telegram_bot.py
+    volumes:
+      - ./uploads:/app/uploads
+      - ./output:/app/output
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    depends_on:
+      - web
