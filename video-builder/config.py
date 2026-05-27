@@ -1,4 +1,5 @@
 import os
+import platform
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -14,24 +15,34 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN', '')
 MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', '15'))
 WEB_PORT = int(os.getenv('WEB_PORT', '5000'))
 
-# Video settings - 720p to save processing & storage
-SEGMENT_DURATION = 8        # giây mỗi ảnh
+# Video settings
+SEGMENT_DURATION = 8
 VIDEO_WIDTH = 1280
 VIDEO_HEIGHT = 720
 OUTPUT_FPS = 25
-TRANSITION_DURATION = 0.8   # crossfade giữa các phân đoạn (s)
-VIDEO_CRF = 23              # 18=tốt nhất, 28=nén nhiều nhất, 23=cân bằng
-VIDEO_PRESET = 'fast'       # ultrafast/fast/medium/slow
+TRANSITION_DURATION = 1.2   # crossfade dài hơn → liền mạch hơn
+VIDEO_CRF = 23
+VIDEO_PRESET = 'fast'
 
-FONT_BOLD = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
-FONT_REGULAR = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+# Audio
+ENABLE_AUDIO = True     # âm thanh nền: gió, công trường, giọng người
+ENABLE_TTS   = True     # giọng đọc tiếng Việt (cần internet lần đầu)
+
+# Fonts (tự phát hiện theo hệ điều hành)
+if platform.system() == 'Windows':
+    _wf = Path('C:/Windows/Fonts')
+    FONT_BOLD    = str(_wf / 'arialbd.ttf')   if (_wf / 'arialbd.ttf').exists() else ''
+    FONT_REGULAR = str(_wf / 'arial.ttf')     if (_wf / 'arial.ttf').exists()   else ''
+else:
+    FONT_BOLD    = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+    FONT_REGULAR = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 
 CONSTRUCTION_STAGES = [
-    {"num": 1, "name": "Chuẩn Bị Mặt Bằng", "desc": "San lấp & phân định công trình"},
-    {"num": 2, "name": "Thi Công Móng",       "desc": "Đào móng, đổ bê tông nền"},
-    {"num": 3, "name": "Xây Khung Kết Cấu",   "desc": "Dựng cột, dầm & kết cấu chịu lực"},
-    {"num": 4, "name": "Xây Tường & Vách",    "desc": "Hoàn thiện tường gạch & vách ngăn"},
-    {"num": 5, "name": "Lợp Mái & Chống Thấm","desc": "Thi công mái & hệ thống chống thấm"},
-    {"num": 6, "name": "Hoàn Thiện Nội Thất", "desc": "Sơn, ốp lát & trang trí nội thất"},
-    {"num": 7, "name": "Nghiệm Thu & Bàn Giao","desc": "Kiểm tra tổng thể & bàn giao công trình"},
+    {"num": 1, "name": "Chuan Bi Mat Bang",    "desc": "San lap & phan dinh cong trinh"},
+    {"num": 2, "name": "Thi Cong Mong",        "desc": "Dao mong, do be tong nen"},
+    {"num": 3, "name": "Xay Khung Ket Cau",    "desc": "Dung cot, dam & ket cau chiu luc"},
+    {"num": 4, "name": "Xay Tuong & Vach",     "desc": "Hoan thien tuong gach & vach ngan"},
+    {"num": 5, "name": "Lop Mai & Chong Tham", "desc": "Thi cong mai & he thong chong tham"},
+    {"num": 6, "name": "Hoan Thien Noi That",  "desc": "Son, op lat & trang tri noi that"},
+    {"num": 7, "name": "Nghiem Thu & Ban Giao", "desc": "Kiem tra tong the & ban giao cong trinh"},
 ]
